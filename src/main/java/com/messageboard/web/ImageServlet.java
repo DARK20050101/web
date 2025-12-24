@@ -103,6 +103,6 @@ public class ImageServlet extends HttpServlet {
         }
 
         // Must match UUID pattern with extension: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx.ext
-        return filename.matches("^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\\.(png|jpg|jpeg|gif)$");
+        return filename.matches("^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\\.(png|jpg|gif)$");
     }
 }

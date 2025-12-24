@@ -26,7 +26,7 @@
             <h1>📝 在线留言板</h1>
             <div class="user-info">
                 <% if (currentUser != null) { %>
-                    <span>欢迎, <strong><%= currentUser.getUsername() %></strong></span>
+                    <span>欢迎, <strong><%= currentUser.getUsername().replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#x27;") %></strong></span>
                     <% if (currentUser.isAdmin()) { %>
                         <a href="<%= request.getContextPath() %>/admin" class="btn btn-secondary">管理面板</a>
                     <% } %>

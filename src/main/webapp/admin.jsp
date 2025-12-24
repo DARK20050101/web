@@ -27,7 +27,7 @@
         <div class="header">
             <h1>🛠️ 管理面板</h1>
             <div class="user-info">
-                <span>管理员: <strong><%= currentUser.getUsername() %></strong></span>
+                <span>管理员: <strong><%= currentUser.getUsername().replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#x27;") %></strong></span>
                 <a href="<%= request.getContextPath() %>/" class="btn btn-secondary">返回首页</a>
                 <button onclick="logout()" class="btn btn-secondary">退出</button>
             </div>
@@ -51,8 +51,8 @@
                     <% for (User user : users) { %>
                     <tr>
                         <td><%= user.getId() %></td>
-                        <td><%= user.getUsername() %></td>
-                        <td><%= user.getEmail() != null ? user.getEmail() : "N/A" %></td>
+                        <td><%= user.getUsername().replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#x27;") %></td>
+                        <td><%= user.getEmail() != null ? user.getEmail().replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#x27;") : "N/A" %></td>
                         <td>
                             <% if (user.isAdmin()) { %>
                                 <span style="color: #dc3545; font-weight: bold;">管理员</span>

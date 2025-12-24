@@ -48,6 +48,8 @@ public class LoginServlet extends HttpServlet {
         // Find user
         User user = userDao.findByUsername(username);
         
+        // SECURITY NOTE: This is a simple demo using plain text password comparison
+        // In production, use PasswordUtil.verifyPassword() or BCrypt for hashed passwords
         if (user != null && user.getPassword().equals(password)) {
             // Login successful
             HttpSession session = request.getSession(true);

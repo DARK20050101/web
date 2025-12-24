@@ -6,8 +6,15 @@ import java.sql.SQLException;
 
 /**
  * Database connection utility
+ * 
+ * SECURITY WARNING: 
+ * - These credentials are for DEVELOPMENT ONLY
+ * - In production, use environment variables or external configuration
+ * - Enable SSL for production databases
+ * - Use strong, unique passwords
  */
 public class DBUtil {
+    // TODO: Move these to environment variables or configuration file
     private static final String URL = "jdbc:mysql://localhost:3306/messageboard?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
     private static final String USER = "root";
     private static final String PASSWORD = "root";
