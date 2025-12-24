@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.messageboard.model.User" %>
+<%@ page import="com.messageboard.util.HtmlUtil" %>
 <%
     User currentUser = (User) session.getAttribute("user");
     String csrfToken = (String) session.getAttribute("csrfToken");
@@ -26,7 +27,7 @@
             <h1>📝 在线留言板</h1>
             <div class="user-info">
                 <% if (currentUser != null) { %>
-                    <span>欢迎, <strong><%= currentUser.getUsername().replace("<", "&lt;").replace(">", "&gt;").replace("&", "&amp;").replace("\"", "&quot;").replace("'", "&#x27;") %></strong></span>
+                    <span>欢迎, <strong><%= HtmlUtil.escapeHtml(currentUser.getUsername()) %></strong></span>
                     <% if (currentUser.isAdmin()) { %>
                         <a href="<%= request.getContextPath() %>/admin" class="btn btn-secondary">管理面板</a>
                     <% } %>
