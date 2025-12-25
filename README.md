@@ -278,31 +278,130 @@ mvn tomcat7:run
 
 ### 5. 常见问题排查
 
-**问题1：启动时报错 "Failed to load database configuration"**
-- 检查 `db.properties` 文件是否存在
+#### ❓ 问题1：留言列表无法正常显示
+
+**可能原因：数据库表未创建**
+
+本项目需要2个数据库表：
+
+**表1: users（用户表）**
+- `id` - 用户ID（主键，自增）
+- `username` - 用户名（唯一，非空）
+- `password` - 密码（SHA-256加密）
+- `email` - 邮箱
+- `is_admin` - 是否管理员（布尔值）
+- `created_at` - 创建时间
+
+**表2: messages（留言表）**
+- `id` - 留言ID（主键，自增）
+- `user_id` - 用户ID（外键，可为空）
+- `nickname` - 昵称（非空）
+- `content` - 留言内容（文本）
+- `image_path` - 图片路径
+- `is_anonymous` - 是否匿名（布尔值）
+- `created_at` - 创建时间
+- `updated_at` - 更新时间
+
+**解决方法（Windows）：**
+
+```cmd
+# 方式1：使用命令行导入
+mysql -u root -p
+# 输入密码：!aBc123456
+# 然后执行：
+source C:\path\to\your\project\database_schema.sql
+
+# 方式2：使用MySQL Workbench（推荐）
+# 1. 打开MySQL Workbench
+# 2. 连接到本地MySQL服务器
+# 3. 点击 File -> Open SQL Script
+# 4. 选择 database_schema.sql 文件
+# 5. 点击闪电图标⚡执行
+# 6. 查看左侧应该有 messageboard 数据库
+```
+
+**验证表是否创建成功：**
+
+```sql
+-- 查看数据库
+SHOW DATABASES;
+
+-- 切换到messageboard数据库
+USE messageboard;
+
+-- 查看所有表
+SHOW TABLES;
+-- 应该显示：users, messages
+
+-- 查看users表结构
+DESCRIBE users;
+
+-- 查看messages表结构
+DESCRIBE messages;
+
+-- 查看初始数据
+SELECT * FROM users;
+-- 应该有1个管理员账号
+
+SELECT * FROM messages;
+-- 应该有5条欢迎留言
+```
+
+如果表不存在，请确保：
+1. ✅ MySQL服务已启动
+2. ✅ database_schema.sql 文件完整
+3. ✅ 使用正确的密码：`!aBc123456`
+4. ✅ SQL脚本成功执行，无错误提示
+
+#### ❓ 问题2：启动时报错 "Failed to load database configuration"
+- 检查 `db.properties` 文件是否存在于 `src/main/resources/` 目录
 - 确认数据库配置信息是否正确
 
-**问题2：无法连接数据库**
-- 确认MySQL服务已启动：`net start mysql`（Windows）
-- 检查数据库用户名和密码是否正确
+#### ❓ 问题3：无法连接数据库
+- 确认MySQL服务已启动：
+  ```cmd
+  # Windows
+  net start mysql
+  # 或在服务管理器中启动MySQL服务
+  ```
+- 检查数据库用户名和密码是否正确（密码：`!aBc123456`）
 - 确认数据库 `messageboard` 已创建
+- 检查3306端口是否被占用或防火墙拦截
 
-**问题3：端口8080被占用**
-- 关闭占用8080端口的程序
-- 或修改 `pom.xml` 中的Tomcat端口配置
+#### ❓ 问题4：端口8080被占用
+- 查看占用8080端口的程序：
+  ```cmd
+  netstat -ano | findstr :8080
+  ```
+- 关闭占用端口的程序，或修改项目端口
+- 修改 `pom.xml` 中的Tomcat端口配置
 
-**问题4：验证码不显示**
-- 清除浏览器缓存
-- 检查浏览器控制台是否有JavaScript错误
+#### ❓ 问题5：验证码不显示
+- 清除浏览器缓存（Ctrl+F5强制刷新）
+- 打开浏览器开发者工具（F12）检查：
+  - Network标签查看 `/captcha` 请求是否成功
+  - Console标签查看是否有JavaScript错误
+- 确认 `CaptchaServlet` 映射正确
 
-**问题5：文件上传失败**
-- 确认 `webapp\uploads` 目录存在
+#### ❓ 问题6：文件上传失败
+- 确认 `src/main/webapp/uploads` 目录存在
 - 检查目录是否有写入权限
+- 确认上传文件大小不超过10MB
 
-**问题6：编译失败**
+#### ❓ 问题7：编译失败
 - 确认Maven配置正确：`mvn -version`
-- 清理Maven缓存：`mvn clean`
-- 删除 `.m2\repository` 目录重新下载依赖
+- 清理Maven缓存：
+  ```cmd
+  mvn clean
+  # 如果还有问题，删除本地仓库重新下载
+  # 删除 C:\Users\你的用户名\.m2\repository
+  ```
+- 检查网络连接，确保能下载Maven依赖
+
+#### ❓ 问题8：页面显示乱码
+- 确认所有文件使用UTF-8编码保存
+- 检查数据库字符集是否为 `utf8mb4`
+- 确认浏览器编码设置为UTF-8
 
 ## 系统架构
 

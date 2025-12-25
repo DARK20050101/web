@@ -57,6 +57,9 @@ function displayMessages(messages) {
         const anonymousBadge = message.anonymous ? '<span class="anonymous-badge">匿名</span>' : '';
         const imagePath = message.imagePath ? `<img src="${message.imagePath}" class="message-image" alt="图片">` : '';
         
+        // Escape and preserve line breaks in content
+        const content = escapeHtml(message.content).replace(/\n/g, '<br>');
+        
         // Check if current user can edit/delete
         const canModify = checkPermission(message);
         const actions = canModify ? `
@@ -75,7 +78,7 @@ function displayMessages(messages) {
                     </div>
                     <span class="message-time">${date}</span>
                 </div>
-                <div class="message-content">${message.content}</div>
+                <div class="message-content">${content}</div>
                 ${imagePath}
                 ${actions}
             </div>
