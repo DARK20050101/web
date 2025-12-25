@@ -82,10 +82,28 @@ public class MessageDAO {
             stmt.setInt(1, pageSize);
             stmt.setInt(2, (page - 1) * pageSize);
             ResultSet rs = stmt.executeQuery();
+            System.out.println("=== DAO Query Execution ===");
+            System.out.println("SQL: " + sql);
+            System.out.println("Page: " + page + ", PageSize: " + pageSize);
+            System.out.println("OFFSET: " + ((page - 1) * pageSize));
+            
+            int count = 0;
             while (rs.next()) {
-                messages.add(extractMessageFromResultSet(rs));
+                try {
+                    Message msg = extractMessageFromResultSet(rs);
+                    messages.add(msg);
+                    count++;
+                    System.out.println("Extracted message #" + count + ": id=" + msg.getId());
+                } catch (SQLException e) {
+                    System.err.println("ERROR extracting message from ResultSet:");
+                    e.printStackTrace();
+                    // Continue to next record instead of breaking entire loop
+                }
             }
+            System.out.println("Total messages extracted: " + count);
+            System.out.println("========================");
         } catch (SQLException e) {
+            System.err.println("ERROR in findAll query:");
             e.printStackTrace();
         }
         return messages;
@@ -107,14 +125,21 @@ public class MessageDAO {
 
     private Message extractMessageFromResultSet(ResultSet rs) throws SQLException {
         Message message = new Message();
-        message.setId(rs.getInt("id"));
-        message.setUserId((Integer) rs.getObject("user_id"));
-        message.setNickname(rs.getString("nickname"));
-        message.setContent(rs.getString("content"));
-        message.setImagePath(rs.getString("image_path"));
-        message.setAnonymous(rs.getBoolean("is_anonymous"));
-        message.setCreatedAt(rs.getTimestamp("created_at"));
-        message.setUpdatedAt(rs.getTimestamp("updated_at"));
+        try {
+            message.setId(rs.getInt("id"));
+            message.setUserId((Integer) rs.getObject("user_id"));
+            message.setNickname(rs.getString("nickname"));
+            message.setContent(rs.getString("content"));
+            message.setImagePath(rs.getString("image_path"));
+            message.setAnonymous(rs.getBoolean("is_anonymous"));
+            message.setCreatedAt(rs.getTimestamp("created_at"));
+            message.setUpdatedAt(rs.getTimestamp("updated_at"));
+        } catch (SQLException e) {
+            System.err.println("ERROR in extractMessageFromResultSet:");
+            System.err.println("Trying to extract: id, user_id, nickname, content, image_path, is_anonymous, created_at, updated_at");
+            System.err.println("Exception: " + e.getMessage());
+            throw e; // Re-throw so caller can handle
+        }
         return message;
     }
 }
