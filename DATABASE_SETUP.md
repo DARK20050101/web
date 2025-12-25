@@ -1,5 +1,7 @@
 # 数据库设置详细指南
 
+> **⚠️ 留言列表无法显示？** 请查看 [TROUBLESHOOTING_MESSAGES.md](TROUBLESHOOTING_MESSAGES.md) 获取完整的问题排查指南！
+
 ## 📊 数据库概述
 
 本项目使用MySQL数据库，共需要**2个表**：
