@@ -77,35 +77,75 @@ public class MessageDAO {
     public List<Message> findAll(int page, int pageSize) {
         List<Message> messages = new ArrayList<>();
         String sql = "SELECT * FROM messages ORDER BY created_at DESC LIMIT ? OFFSET ?";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        
+        System.out.println("=== DAO Query Execution START ===");
+        System.out.println("SQL: " + sql);
+        System.out.println("Page: " + page + ", PageSize: " + pageSize);
+        System.out.println("OFFSET: " + ((page - 1) * pageSize));
+        
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = DBUtil.getConnection();
+            System.out.println("Database connection obtained: " + (conn != null ? "SUCCESS" : "FAILED"));
+            
+            if (conn != null) {
+                System.out.println("Connection autoCommit: " + conn.getAutoCommit());
+                System.out.println("Connection catalog: " + conn.getCatalog());
+            }
+            
+            stmt = conn.prepareStatement(sql);
             stmt.setInt(1, pageSize);
             stmt.setInt(2, (page - 1) * pageSize);
-            ResultSet rs = stmt.executeQuery();
-            System.out.println("=== DAO Query Execution ===");
-            System.out.println("SQL: " + sql);
-            System.out.println("Page: " + page + ", PageSize: " + pageSize);
-            System.out.println("OFFSET: " + ((page - 1) * pageSize));
+            
+            System.out.println("About to execute query...");
+            rs = stmt.executeQuery();
+            System.out.println("Query executed, ResultSet obtained: " + (rs != null ? "SUCCESS" : "FAILED"));
             
             int count = 0;
+            System.out.println("Starting to iterate through ResultSet...");
+            
             while (rs.next()) {
                 try {
+                    count++;
+                    System.out.println("Processing row #" + count);
                     Message msg = extractMessageFromResultSet(rs);
                     messages.add(msg);
-                    count++;
-                    System.out.println("Extracted message #" + count + ": id=" + msg.getId());
+                    System.out.println("Extracted message #" + count + ": id=" + msg.getId() + ", nickname=" + msg.getNickname());
                 } catch (SQLException e) {
-                    System.err.println("ERROR extracting message from ResultSet:");
+                    System.err.println("ERROR extracting message #" + count + " from ResultSet:");
                     e.printStackTrace();
                     // Continue to next record instead of breaking entire loop
                 }
             }
-            System.out.println("Total messages extracted: " + count);
-            System.out.println("========================");
+            
+            System.out.println("Finished iterating. Total messages extracted: " + count);
+            System.out.println("Messages list size: " + messages.size());
+            
         } catch (SQLException e) {
-            System.err.println("ERROR in findAll query:");
+            System.err.println("CRITICAL ERROR in findAll query:");
+            System.err.println("Error message: " + e.getMessage());
+            System.err.println("SQL State: " + e.getSQLState());
+            System.err.println("Error Code: " + e.getErrorCode());
             e.printStackTrace();
+        } finally {
+            // Close resources manually to ensure proper cleanup
+            try {
+                if (rs != null) rs.close();
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.err.println("Error closing resources:");
+                e.printStackTrace();
+            }
         }
+        
+        System.out.println("=== DAO Query Execution END ===");
+        System.out.println("Returning " + messages.size() + " messages");
+        System.out.println("========================");
+        
         return messages;
     }
 
