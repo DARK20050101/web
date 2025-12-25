@@ -6,10 +6,11 @@
 }
 
 body {
-    font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+    font-family: 'Segoe UI', 'Arial', 'Microsoft YaHei', sans-serif;
     line-height: 1.6;
     color: #333;
-    background: #f5f5f5;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
 }
 
 .container {
@@ -22,13 +23,30 @@ body {
 .header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    padding: 20px 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 25px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .header h1 {
     display: inline-block;
-    font-size: 28px;
+    font-size: 32px;
+    font-weight: 600;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 .user-info {
@@ -36,10 +54,23 @@ body {
     margin-top: 10px;
 }
 
+.user-info strong {
+    background: rgba(255,255,255,0.2);
+    padding: 3px 10px;
+    border-radius: 15px;
+    margin: 0 5px;
+}
+
 .user-info a {
     color: white;
     text-decoration: none;
     margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.user-info a:hover {
+    transform: translateY(-2px);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 /* Forms */
@@ -93,34 +124,41 @@ body {
     display: inline-block;
     padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 14px;
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
 .btn-primary {
-    background: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: linear-gradient(135deg, #5568d3 0%, #653a8a 100%);
 }
 
 .btn-small {
-    padding: 5px 15px;
-    font-size: 12px;
+    padding: 6px 16px;
+    font-size: 13px;
 }
 
 .btn-danger {
-    background: #e74c3c;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
 }
 
 .btn-danger:hover {
-    background: #c0392b;
+    background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
 }
 
 /* Alerts */
@@ -191,32 +229,90 @@ body {
 .message-form-container {
     background: white;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     margin-bottom: 30px;
+    animation: fadeInUp 0.6s ease-out;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.message-form-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message-form-container h3 {
     margin-bottom: 20px;
     color: #667eea;
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.message-form-container h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
 }
 
 /* Message List */
 .message-list-container {
     background: white;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .message-list-container h3 {
     margin-bottom: 20px;
     color: #667eea;
+    font-size: 24px;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+.message-list-container h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 2px;
 }
 
 .message-item {
-    border-bottom: 1px solid #eee;
-    padding: 20px 0;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 20px;
+    margin: 0 -10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.message-item:hover {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+    transform: translateX(5px);
+    box-shadow: -3px 0 0 #667eea;
 }
 
 .message-item:last-child {
@@ -231,25 +327,37 @@ body {
 }
 
 .message-author {
-    font-weight: bold;
+    font-weight: 600;
     color: #667eea;
+    font-size: 16px;
 }
 
 .message-time {
     color: #999;
     font-size: 12px;
+    font-style: italic;
 }
 
 .message-content {
     margin-bottom: 10px;
     line-height: 1.8;
+    color: #555;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .message-image {
     max-width: 300px;
     max-height: 300px;
     margin: 10px 0;
-    border-radius: 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.message-image:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
 .message-actions {
@@ -258,8 +366,21 @@ body {
 
 .message-actions button {
     margin-right: 10px;
-    padding: 5px 15px;
+    padding: 6px 16px;
     font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.message-actions button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.no-messages {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+    font-style: italic;
 }
 
 /* Pagination */
@@ -316,12 +437,24 @@ body {
 
 /* Anonymous badge */
 .anonymous-badge {
-    background: #f39c12;
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
     color: white;
-    padding: 2px 8px;
-    border-radius: 3px;
+    padding: 3px 10px;
+    border-radius: 12px;
     font-size: 11px;
-    margin-left: 5px;
+    font-weight: 600;
+    margin-left: 8px;
+    box-shadow: 0 2px 5px rgba(243, 156, 18, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
 }
 
 /* Responsive */

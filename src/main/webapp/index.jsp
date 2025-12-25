@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%
     String username = (String) session.getAttribute("username");
+    Integer userId = (Integer) session.getAttribute("userId");
     Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
     String csrfToken = (String) session.getAttribute("csrfToken");
     if (csrfToken == null) {
@@ -15,6 +16,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>留言板系统</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+    <script>
+        // Pass session data to JavaScript
+        const currentUserId = <%= userId != null ? userId : "null" %>;
+        const currentIsAdmin = <%= isAdmin != null && isAdmin ? "true" : "false" %>;
+    </script>
 </head>
 <body>
     <div class="header">

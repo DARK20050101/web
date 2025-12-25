@@ -8,6 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup edit user form submission
     document.getElementById('editUserForm').addEventListener('submit', handleEditUserSubmit);
+    
+    // Setup create user form submission
+    document.getElementById('createUserForm').addEventListener('submit', handleCreateUserSubmit);
+    
+    // Setup edit message form submission
+    document.getElementById('editMessageForm').addEventListener('submit', handleEditMessageSubmit);
 });
 
 // Show tab
@@ -126,6 +132,7 @@ function displayMessages(messages) {
                 <td>${type}</td>
                 <td>${date}</td>
                 <td class="actions">
+                    <button class="btn btn-small" onclick="editMessage(${message.id})">编辑</button>
                     <button class="btn btn-small btn-danger" onclick="deleteMessage(${message.id})">删除</button>
                 </td>
             </tr>
@@ -281,6 +288,94 @@ function closeEditUserModal() {
     document.getElementById('editUserModal').style.display = 'none';
 }
 
+// Show create user modal
+function showCreateUserModal() {
+    document.getElementById('createUserForm').reset();
+    document.getElementById('createUserModal').style.display = 'block';
+}
+
+// Close create user modal
+function closeCreateUserModal() {
+    document.getElementById('createUserModal').style.display = 'none';
+}
+
+// Handle create user form submission
+function handleCreateUserSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('api', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            closeCreateUserModal();
+            loadUsers();
+        } else {
+            showError(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('创建用户时发生错误');
+    });
+}
+
+// Edit message
+function editMessage(messageId) {
+    fetch(`api?action=get&type=message&id=${messageId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const message = data.data;
+                document.getElementById('editMessageId').value = message.id;
+                document.getElementById('editMessageContent').value = message.content;
+                document.getElementById('editMessageModal').style.display = 'block';
+            } else {
+                showError('加载留言信息失败');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('加载留言时发生错误');
+        });
+}
+
+// Close edit message modal
+function closeEditMessageModal() {
+    document.getElementById('editMessageModal').style.display = 'none';
+}
+
+// Handle edit message form submission
+function handleEditMessageSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('api', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            closeEditMessageModal();
+            loadMessages(currentMessagePage);
+        } else {
+            showError(data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showError('更新留言时发生错误');
+    });
+}
+
 // Show error
 function showError(message) {
     alert(message);
@@ -295,8 +390,17 @@ function escapeHtml(text) {
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-    const modal = document.getElementById('editUserModal');
-    if (event.target === modal) {
-        modal.style.display = 'none';
+    const editUserModal = document.getElementById('editUserModal');
+    const createUserModal = document.getElementById('createUserModal');
+    const editMessageModal = document.getElementById('editMessageModal');
+    
+    if (event.target === editUserModal) {
+        editUserModal.style.display = 'none';
+    }
+    if (event.target === createUserModal) {
+        createUserModal.style.display = 'none';
+    }
+    if (event.target === editMessageModal) {
+        editMessageModal.style.display = 'none';
     }
 }

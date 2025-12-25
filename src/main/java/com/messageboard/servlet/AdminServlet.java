@@ -132,6 +132,33 @@ public class AdminServlet extends HttpServlet {
                     result.put("success", false);
                     result.put("message", "用户不存在");
                 }
+            } else if ("message".equals(type)) {
+                int id = Integer.parseInt(request.getParameter("id"));
+                String content = request.getParameter("content");
+                Integer userId = (Integer) session.getAttribute("userId");
+                
+                boolean success = messageService.updateMessage(id, content, null, userId, true);
+                result.put("success", success);
+                result.put("message", success ? "留言更新成功" : "留言更新失败");
+            }
+        } else if ("create".equals(action)) {
+            if ("user".equals(type)) {
+                String username = request.getParameter("username");
+                String password = request.getParameter("password");
+                String email = request.getParameter("email");
+                boolean isAdminUser = "true".equals(request.getParameter("isAdmin"));
+                
+                boolean success = userService.register(username, password, email);
+                if (success && isAdminUser) {
+                    // Update user to admin if needed
+                    User user = userService.getUserByUsername(username);
+                    if (user != null) {
+                        user.setAdmin(true);
+                        userService.updateUser(user);
+                    }
+                }
+                result.put("success", success);
+                result.put("message", success ? "用户创建成功" : "用户创建失败（用户名可能已存在）");
             }
         }
 

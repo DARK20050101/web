@@ -234,10 +234,20 @@ function closeEditModal() {
 
 // Check if user has permission to modify message
 function checkPermission(message) {
-    // This is a simple check on client side
     // Server side will do the actual authorization
-    const userInfo = document.querySelector('.user-info');
-    return userInfo && userInfo.textContent.includes('欢迎');
+    // This is just for UI display
+    
+    // Admin can modify all messages
+    if (currentIsAdmin) {
+        return true;
+    }
+    
+    // Logged-in user can modify their own messages
+    if (currentUserId && message.userId && currentUserId === message.userId) {
+        return true;
+    }
+    
+    return false;
 }
 
 // Show alert message

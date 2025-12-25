@@ -38,7 +38,10 @@
             
             <!-- Users Management -->
             <div id="usersTab" class="tab-content active">
-                <h3>用户管理</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">用户管理</h3>
+                    <button class="btn btn-primary" onclick="showCreateUserModal()">➕ 添加用户</button>
+                </div>
                 <table id="usersTable" class="data-table">
                     <thead>
                         <tr>
@@ -79,6 +82,48 @@
         </div>
     </div>
     
+    <!-- Create User Modal -->
+    <div id="createUserModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateUserModal()">&times;</span>
+            <h3>添加新用户</h3>
+            <form id="createUserForm">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <input type="hidden" name="action" value="create">
+                <input type="hidden" name="type" value="user">
+                
+                <div class="form-group">
+                    <label for="createUsername">用户名：</label>
+                    <input type="text" id="createUsername" name="username" required 
+                           pattern="[a-zA-Z0-9_]{3,20}" title="用户名只能包含字母、数字和下划线，长度3-20位">
+                </div>
+                
+                <div class="form-group">
+                    <label for="createPassword">密码：</label>
+                    <input type="password" id="createPassword" name="password" required 
+                           minlength="6" title="密码长度至少6位">
+                </div>
+                
+                <div class="form-group">
+                    <label for="createEmail">邮箱：</label>
+                    <input type="email" id="createEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="createIsAdmin" name="isAdmin" value="true">
+                        设为管理员
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">创建</button>
+                    <button type="button" class="btn" onclick="closeCreateUserModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
     <!-- Edit User Modal -->
     <div id="editUserModal" class="modal">
         <div class="modal-content">
@@ -110,6 +155,30 @@
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">保存</button>
                     <button type="button" class="btn" onclick="closeEditUserModal()">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Message Modal -->
+    <div id="editMessageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditMessageModal()">&times;</span>
+            <h3>编辑留言</h3>
+            <form id="editMessageForm">
+                <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+                <input type="hidden" name="action" value="update">
+                <input type="hidden" name="type" value="message">
+                <input type="hidden" id="editMessageId" name="id">
+                
+                <div class="form-group">
+                    <label for="editMessageContent">留言内容：</label>
+                    <textarea id="editMessageContent" name="content" rows="5" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">保存</button>
+                    <button type="button" class="btn" onclick="closeEditMessageModal()">取消</button>
                 </div>
             </form>
         </div>
