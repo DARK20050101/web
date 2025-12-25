@@ -123,50 +123,186 @@ web/
 
 ### 1. 环境要求
 - JDK 1.8+
-- MySQL 5.7+
-- Apache Tomcat 8.5+
+- MySQL 5.7+ 或 MySQL 8.0+
+- Apache Tomcat 8.5+ 或 9.0+
 - Maven 3.6+
 
-### 2. 数据库配置
+### 2. Windows系统快速部署指南
 
-创建数据库并导入表结构：
+#### 2.1 安装必要软件
 
-```bash
+**安装JDK**
+1. 从Oracle官网下载JDK 8或更高版本
+2. 运行安装程序，记住安装路径（例如：`C:\Program Files\Java\jdk1.8.0_xxx`）
+3. 配置环境变量：
+   - 右键"此电脑" → "属性" → "高级系统设置" → "环境变量"
+   - 新建系统变量 `JAVA_HOME`，值为JDK安装路径
+   - 编辑 `Path` 变量，添加 `%JAVA_HOME%\bin`
+4. 验证安装：打开命令提示符，输入 `java -version`
+
+**安装MySQL**
+1. 从MySQL官网下载MySQL Installer
+2. 选择"Developer Default"安装类型
+3. 设置root密码（例如：`!aBc123456`）
+4. 完成安装后，MySQL会自动启动
+
+**安装Maven**
+1. 从Apache Maven官网下载Maven
+2. 解压到目录（例如：`C:\Program Files\Apache\maven`）
+3. 配置环境变量：
+   - 新建系统变量 `MAVEN_HOME`，值为Maven解压路径
+   - 编辑 `Path` 变量，添加 `%MAVEN_HOME%\bin`
+4. 验证安装：打开命令提示符，输入 `mvn -version`
+
+**安装Tomcat**
+1. 从Apache Tomcat官网下载Tomcat 9
+2. 解压到目录（例如：`C:\Program Files\Apache\tomcat`）
+3. 配置环境变量：
+   - 新建系统变量 `CATALINA_HOME`，值为Tomcat解压路径
+
+#### 2.2 配置数据库
+
+**方式一：使用命令行**
+```cmd
+# 打开命令提示符（以管理员身份运行）
+cd /d "项目所在路径"
+
+# 登录MySQL（输入密码：!aBc123456）
+mysql -u root -p
+
+# 执行SQL脚本
+source database_schema.sql
+# 或者退出MySQL后执行：
 mysql -u root -p < database_schema.sql
 ```
 
-修改数据库配置文件 `src/main/resources/db.properties`：
+**方式二：使用MySQL Workbench（推荐）**
+1. 打开MySQL Workbench
+2. 连接到本地MySQL服务器
+3. 点击"File" → "Open SQL Script"
+4. 选择项目中的 `database_schema.sql` 文件
+5. 点击闪电图标执行脚本
+6. 验证数据库创建成功：应该能看到 `messageboard` 数据库
+
+**配置数据库连接**
+
+编辑 `src\main\resources\db.properties`：
 
 ```properties
 db.driver=com.mysql.cj.jdbc.Driver
-db.url=jdbc:mysql://localhost:3306/messageboard?useSSL=false&serverTimezone=UTC
+db.url=jdbc:mysql://localhost:3306/messageboard?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
 db.username=root
-db.password=your_password
+db.password=!aBc123456
 ```
 
-### 3. 编译项目
+#### 2.3 编译项目
 
-```bash
+打开命令提示符，切换到项目目录：
+
+```cmd
+cd /d "项目所在路径"
 mvn clean package
 ```
 
-### 4. 部署到Tomcat
+编译成功后，会在 `target` 目录下生成 `messageboard.war` 文件。
 
-方式一：将生成的 `target/messageboard.war` 复制到Tomcat的 `webapps` 目录
+#### 2.4 部署运行
 
-方式二：使用Maven Tomcat插件运行：
+**方式一：直接使用Maven运行（推荐，最简单）**
 
-```bash
+```cmd
 mvn tomcat7:run
 ```
 
-### 5. 访问应用
+启动成功后，浏览器访问：`http://localhost:8080/messageboard`
+
+**方式二：部署到Tomcat**
+
+1. 将 `target\messageboard.war` 复制到 `%CATALINA_HOME%\webapps` 目录
+2. 启动Tomcat：
+   ```cmd
+   cd /d "%CATALINA_HOME%\bin"
+   startup.bat
+   ```
+3. 浏览器访问：`http://localhost:8080/messageboard`
+
+**方式三：使用IDE（Eclipse/IntelliJ IDEA）**
+
+在IntelliJ IDEA中：
+1. 打开项目
+2. 配置Tomcat服务器：Run → Edit Configurations → + → Tomcat Server → Local
+3. 设置Tomcat路径
+4. 在Deployment标签添加 `messageboard:war exploded`
+5. 点击运行按钮
+
+#### 2.5 验证系统运行
+
+1. 打开浏览器访问：`http://localhost:8080/messageboard`
+2. 应该能看到留言板主页
+3. 使用管理员账号登录：
+   - 用户名：`admin`
+   - 密码：`admin123`
+4. 测试功能：
+   - 发表匿名留言（需要验证码）
+   - 注册新用户
+   - 登录后发表留言
+   - 上传图片
+   - 访问管理后台
+
+### 3. Linux/macOS系统部署
+
+```bash
+# 1. 配置数据库
+mysql -u root -p < database_schema.sql
+
+# 2. 修改配置文件
+vim src/main/resources/db.properties
+
+# 3. 编译项目
+mvn clean package
+
+# 4. 运行项目
+mvn tomcat7:run
+```
+
+### 4. 访问应用
 
 浏览器访问：`http://localhost:8080/messageboard`
 
-默认管理员账号：
+**默认管理员账号：**
 - 用户名：`admin`
 - 密码：`admin123`
+
+**数据库密码：**
+- 已配置为：`!aBc123456`
+
+### 5. 常见问题排查
+
+**问题1：启动时报错 "Failed to load database configuration"**
+- 检查 `db.properties` 文件是否存在
+- 确认数据库配置信息是否正确
+
+**问题2：无法连接数据库**
+- 确认MySQL服务已启动：`net start mysql`（Windows）
+- 检查数据库用户名和密码是否正确
+- 确认数据库 `messageboard` 已创建
+
+**问题3：端口8080被占用**
+- 关闭占用8080端口的程序
+- 或修改 `pom.xml` 中的Tomcat端口配置
+
+**问题4：验证码不显示**
+- 清除浏览器缓存
+- 检查浏览器控制台是否有JavaScript错误
+
+**问题5：文件上传失败**
+- 确认 `webapp\uploads` 目录存在
+- 检查目录是否有写入权限
+
+**问题6：编译失败**
+- 确认Maven配置正确：`mvn -version`
+- 清理Maven缓存：`mvn clean`
+- 删除 `.m2\repository` 目录重新下载依赖
 
 ## 系统架构
 
