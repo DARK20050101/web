@@ -20,6 +20,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<%= csrfToken %>">
+    <meta name="context-path" content="<%= request.getContextPath() %>">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline';
@@ -153,6 +154,8 @@
         window.currentUser = <%= isLoggedIn ? "{\"username\":\"" + SecurityUtil.escapeHtml(username) + "\",\"isAdmin\":" + isAdmin + "}" : "null" %>;
         // Set CSRF token
         csrfToken = '<%= csrfToken %>';
+        // Set context path
+        contextPath = '<%= request.getContextPath() %>';
     </script>
     <script src="<%= request.getContextPath() %>/js/app.js"></script>
 </body>

@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 -- Password is hashed using SHA-256
 INSERT INTO users (username, password, email, is_admin) VALUES
 ('admin', 
- 'SHA2(\'admin123\', 256)', 
+ SHA2('admin123', 256), 
  'admin@messageboard.local', 
  TRUE)
 ON DUPLICATE KEY UPDATE username=username;

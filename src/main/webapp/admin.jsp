@@ -25,6 +25,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="<%= csrfToken %>">
+    <meta name="context-path" content="<%= request.getContextPath() %>">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
         script-src 'self' 'unsafe-inline';
@@ -85,10 +86,11 @@
     <script>
         window.currentUser = {"username":"<%= SecurityUtil.escapeHtml(username) %>","isAdmin":true};
         csrfToken = '<%= csrfToken %>';
+        contextPath = '<%= request.getContextPath() %>';
         
         // Load messages and update statistics
         document.addEventListener('DOMContentLoaded', function() {
-            fetch('/api/messages')
+            fetch(contextPath + '/api/messages')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

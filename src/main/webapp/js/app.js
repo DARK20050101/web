@@ -1,9 +1,16 @@
 // Message Board Application JavaScript
 
 let csrfToken = '';
+let contextPath = '';
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
+    // Get context path from a script tag or meta tag
+    const metaContext = document.querySelector('meta[name="context-path"]');
+    if (metaContext) {
+        contextPath = metaContext.getAttribute('content');
+    }
+    
     initCsrfToken();
     initEmojiPicker();
     initImageUpload();
@@ -86,7 +93,7 @@ function initImageUpload() {
 function initCaptcha() {
     const captchaContainer = document.getElementById('captchaContainer');
     if (captchaContainer && captchaContainer.style.display !== 'none') {
-        fetch('/api/captcha')
+        fetch(contextPath + '/api/captcha')
             .then(response => response.json())
             .then(data => {
                 const captchaQuestion = document.getElementById('captchaQuestion');
@@ -122,7 +129,7 @@ function submitMessage(event) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Posting...';
     
-    fetch('/api/messages', {
+    fetch(contextPath + '/api/messages', {
         method: 'POST',
         body: formData,
         headers: {
@@ -160,7 +167,7 @@ function submitMessage(event) {
 
 // Load messages
 function loadMessages() {
-    fetch('/api/messages')
+    fetch(contextPath + '/api/messages')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -191,7 +198,7 @@ function renderMessages(messages) {
         
         let imageHtml = '';
         if (message.imagePath) {
-            imageHtml = `<img src="/image/${message.imagePath}" 
+            imageHtml = `<img src="${contextPath}/image/${message.imagePath}" 
                               alt="Attached image" 
                               class="message-image" 
                               onclick="openImageModal(this.src)">`;
@@ -226,7 +233,7 @@ function deleteMessage(id) {
         return;
     }
     
-    fetch(`/api/messages?id=${id}`, {
+    fetch(contextPath + `/api/messages?id=${id}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-Token': csrfToken
@@ -314,7 +321,7 @@ function login(event) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="loading"></span> Logging in...';
     
-    fetch('/login', {
+    fetch(contextPath + '/login', {
         method: 'POST',
         body: formData,
         headers: {
@@ -325,7 +332,7 @@ function login(event) {
     .then(data => {
         if (data.success) {
             csrfToken = data.csrfToken;
-            window.location.href = '/index.jsp';
+            window.location.href = contextPath + '/index.jsp';
         } else {
             showAlert(data.error || 'Login failed', 'error');
             submitBtn.disabled = false;
@@ -342,5 +349,5 @@ function login(event) {
 
 // Logout function
 function logout() {
-    window.location.href = '/login?action=logout';
+    window.location.href = contextPath + '/login?action=logout';
 }
