@@ -70,6 +70,8 @@ public class LoginServlet extends HttpServlet {
                         cookie.setMaxAge(30 * 24 * 60 * 60); // 30 days
                         cookie.setHttpOnly(true);
                         cookie.setPath(request.getContextPath());
+                        // Set secure flag if request is over HTTPS
+                        cookie.setSecure(request.isSecure());
                         response.addCookie(cookie);
                     }
                 }
@@ -115,6 +117,8 @@ public class LoginServlet extends HttpServlet {
                         }
                         cookie.setMaxAge(0);
                         cookie.setPath(request.getContextPath());
+                        // Set secure flag if request is over HTTPS
+                        cookie.setSecure(request.isSecure());
                         response.addCookie(cookie);
                         break;
                     }
