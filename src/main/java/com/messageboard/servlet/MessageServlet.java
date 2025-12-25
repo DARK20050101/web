@@ -3,6 +3,7 @@ package com.messageboard.servlet;
 import com.messageboard.model.Message;
 import com.messageboard.service.MessageService;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -26,7 +27,10 @@ import java.util.UUID;
 )
 public class MessageServlet extends HttpServlet {
     private MessageService messageService = new MessageService();
-    private Gson gson = new Gson();
+    private Gson gson = new GsonBuilder()
+            .setDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+            .serializeNulls()
+            .create();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,6 +54,15 @@ public class MessageServlet extends HttpServlet {
             List<Message> messages = messageService.getMessages(page, pageSize);
             int totalPages = messageService.getTotalPages(pageSize);
             int totalCount = messageService.getTotalCount();
+            
+            // Debug logging
+            System.out.println("=== Message List Debug ===");
+            System.out.println("Total Count: " + totalCount);
+            System.out.println("Messages Retrieved: " + messages.size());
+            if (messages.size() > 0) {
+                System.out.println("First Message: " + messages.get(0).toString());
+            }
+            System.out.println("=========================");
 
             Map<String, Object> result = new HashMap<>();
             result.put("success", true);
@@ -57,8 +70,10 @@ public class MessageServlet extends HttpServlet {
             result.put("currentPage", page);
             result.put("totalPages", totalPages);
             result.put("totalCount", totalCount);
-
-            out.print(gson.toJson(result));
+            
+            String jsonResult = gson.toJson(result);
+            System.out.println("JSON Response length: " + jsonResult.length());
+            out.print(jsonResult);
         } else if ("get".equals(action)) {
             int id = Integer.parseInt(request.getParameter("id"));
             Message message = messageService.getMessageById(id);
