@@ -91,6 +91,15 @@
         <url-pattern>/admin/api</url-pattern>
     </servlet-mapping>
 
+    <servlet>
+        <servlet-name>DiagnosticServlet</servlet-name>
+        <servlet-class>com.messageboard.servlet.DiagnosticServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>DiagnosticServlet</servlet-name>
+        <url-pattern>/diagnostic-db</url-pattern>
+    </servlet-mapping>
+
     <!-- Error pages -->
     <error-page>
         <error-code>404</error-code>
