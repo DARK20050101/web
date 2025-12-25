@@ -216,17 +216,46 @@ public class MessageServlet extends HttpServlet {
 
     private String saveUploadedFile(Part filePart, HttpServletRequest request) throws IOException {
         String fileName = getFileName(filePart);
-        String fileExtension = fileName.substring(fileName.lastIndexOf("."));
-        String newFileName = UUID.randomUUID().toString() + fileExtension;
         
-        String uploadPath = request.getServletContext().getRealPath("/") + "uploads";
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
+        // Validate file name
+        if (fileName == null || fileName.isEmpty()) {
+            throw new IOException("Invalid file name");
         }
         
+        // Get file extension
+        String fileExtension = "";
+        int dotIndex = fileName.lastIndexOf(".");
+        if (dotIndex > 0 && dotIndex < fileName.length() - 1) {
+            fileExtension = fileName.substring(dotIndex);
+        }
+        
+        // Generate unique filename
+        String newFileName = UUID.randomUUID().toString() + fileExtension;
+        
+        // Get webapp root path and ensure uploads directory exists
+        String webappPath = request.getServletContext().getRealPath("/");
+        String uploadPath = webappPath + File.separator + "uploads";
+        
+        File uploadDir = new File(uploadPath);
+        if (!uploadDir.exists()) {
+            boolean created = uploadDir.mkdirs();
+            System.out.println("Upload directory created: " + uploadPath + " - Success: " + created);
+        }
+        
+        // Save file
         String filePath = uploadPath + File.separator + newFileName;
+        File outputFile = new File(filePath);
+        
+        System.out.println("Saving uploaded file to: " + filePath);
         filePart.write(filePath);
+        
+        // Verify file was saved
+        if (outputFile.exists()) {
+            System.out.println("File saved successfully: " + outputFile.getAbsolutePath() + 
+                             " (Size: " + outputFile.length() + " bytes)");
+        } else {
+            System.err.println("WARNING: File was not saved to: " + filePath);
+        }
         
         return "uploads/" + newFileName;
     }
