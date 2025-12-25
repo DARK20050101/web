@@ -1,5 +1,6 @@
 package com.messageboard.model;
 
+import com.google.gson.annotations.SerializedName;
 import java.sql.Timestamp;
 
 public class User {
@@ -7,7 +8,10 @@ public class User {
     private String username;
     private String password;
     private String email;
+    
+    @SerializedName("admin")
     private boolean isAdmin;
+    
     private Timestamp createdAt;
 
     public User() {

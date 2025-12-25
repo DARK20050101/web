@@ -1,5 +1,6 @@
 package com.messageboard.model;
 
+import com.google.gson.annotations.SerializedName;
 import java.sql.Timestamp;
 
 public class Message {
@@ -8,7 +9,10 @@ public class Message {
     private String nickname;
     private String content;
     private String imagePath;
+    
+    @SerializedName("anonymous")
     private boolean isAnonymous;
+    
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
