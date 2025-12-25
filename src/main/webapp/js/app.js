@@ -192,6 +192,10 @@ function renderMessages(messages) {
         return;
     }
     
+    // Note: message.content and message.author are already HTML-escaped on the backend
+    // via SecurityUtil.escapeHtml() before being returned in JSON (see MessageServlet.convertMessageToMap)
+    // No client-side escaping is needed to avoid double-escaping.
+    // message.imagePath is a UUID (validated by regex in ImageServlet) so it's safe by design.
     messageList.innerHTML = messages.map(message => {
         const date = new Date(message.createdAt);
         const formattedDate = formatDate(date);
@@ -212,7 +216,7 @@ function renderMessages(messages) {
             <div class="message-item">
                 <div class="message-header">
                     <span class="message-author">
-                        ${escapeHtml(message.author)}
+                        ${message.author}
                         ${isAdmin ? '<span class="admin-badge">ADMIN</span>' : ''}
                     </span>
                     <div>
