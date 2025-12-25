@@ -148,15 +148,7 @@ public class AdminServlet extends HttpServlet {
                 String email = request.getParameter("email");
                 boolean isAdminUser = "true".equals(request.getParameter("isAdmin"));
                 
-                boolean success = userService.register(username, password, email);
-                if (success && isAdminUser) {
-                    // Update user to admin if needed
-                    User user = userService.getUserByUsername(username);
-                    if (user != null) {
-                        user.setAdmin(true);
-                        userService.updateUser(user);
-                    }
-                }
+                boolean success = userService.register(username, password, email, isAdminUser);
                 result.put("success", success);
                 result.put("message", success ? "用户创建成功" : "用户创建失败（用户名可能已存在）");
             }

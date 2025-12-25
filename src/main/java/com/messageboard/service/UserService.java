@@ -18,6 +18,10 @@ public class UserService {
     }
 
     public boolean register(String username, String password, String email) {
+        return register(username, password, email, false);
+    }
+    
+    public boolean register(String username, String password, String email, boolean isAdmin) {
         // Check if username already exists
         if (userDAO.findByUsername(username) != null) {
             return false;
@@ -27,7 +31,7 @@ public class UserService {
         user.setUsername(username);
         user.setPassword(SecurityUtil.hashPassword(password));
         user.setEmail(email);
-        user.setAdmin(false);
+        user.setAdmin(isAdmin);
         
         return userDAO.save(user);
     }
