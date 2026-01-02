@@ -66,4 +66,17 @@ public class MessageService {
     public int getTotalCount() {
         return messageDAO.getTotalCount();
     }
+
+    public List<Message> searchMessages(String keyword, int page, int pageSize) {
+        return messageDAO.searchMessages(keyword, page, pageSize);
+    }
+
+    public int getSearchTotalPages(String keyword, int pageSize) {
+        int totalCount = messageDAO.getSearchResultCount(keyword);
+        return (int) Math.ceil((double) totalCount / pageSize);
+    }
+
+    public int getSearchResultCount(String keyword) {
+        return messageDAO.getSearchResultCount(keyword);
+    }
 }

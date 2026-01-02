@@ -61,7 +61,15 @@
             
             <!-- Messages Management -->
             <div id="messagesTab" class="tab-content">
-                <h3>留言管理</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0;">留言管理</h3>
+                    <div class="search-box">
+                        <input type="text" id="messageSearchInput" placeholder="搜索留言（内容、昵称或ID）..." 
+                               onkeyup="debounceSearch(this.value)">
+                        <button class="btn btn-small" onclick="clearSearch()">清除</button>
+                        <span id="searchStatus" class="search-status"></span>
+                    </div>
+                </div>
                 <table id="messagesTable" class="data-table">
                     <thead>
                         <tr>

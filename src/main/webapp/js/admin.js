@@ -1,6 +1,8 @@
 // Admin Dashboard JavaScript
 let currentTab = 'users';
 let currentMessagePage = 1;
+let currentSearchKeyword = '';
+let searchTimeout = null;
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -15,6 +17,61 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup edit message form submission
     document.getElementById('editMessageForm').addEventListener('submit', handleEditMessageSubmit);
 });
+
+// Debounce search function
+function debounceSearch(keyword) {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+        searchMessages(keyword, 1);
+    }, 500); // Wait 500ms after user stops typing
+}
+
+// Search messages
+function searchMessages(keyword, page) {
+    currentSearchKeyword = keyword;
+    currentMessagePage = page;
+    
+    const searchStatus = document.getElementById('searchStatus');
+    
+    if (!keyword || keyword.trim() === '') {
+        // If empty, load all messages
+        loadMessages(page);
+        searchStatus.textContent = '';
+        return;
+    }
+    
+    searchStatus.textContent = '搜索中...';
+    
+    fetch(`api?action=search&type=messages&keyword=${encodeURIComponent(keyword)}&page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayMessages(data.data);
+                displayMessagePagination(page, data.totalPages, true);
+                searchStatus.textContent = `找到 ${data.totalCount} 条结果`;
+                if (data.data.length === 0) {
+                    document.getElementById('messagesTableBody').innerHTML = 
+                        '<tr><td colspan="6">未找到匹配的留言</td></tr>';
+                }
+            } else {
+                showError('搜索失败');
+                searchStatus.textContent = '搜索失败';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showError('搜索时发生错误');
+            searchStatus.textContent = '搜索错误';
+        });
+}
+
+// Clear search
+function clearSearch() {
+    document.getElementById('messageSearchInput').value = '';
+    document.getElementById('searchStatus').textContent = '';
+    currentSearchKeyword = '';
+    loadMessages(1);
+}
 
 // Show tab
 function showTab(tabName) {
@@ -36,6 +93,7 @@ function showTab(tabName) {
     if (tabName === 'users') {
         loadUsers();
     } else if (tabName === 'messages') {
+        clearSearch(); // Clear search when switching to messages tab
         loadMessages(1);
     }
 }
@@ -141,7 +199,7 @@ function displayMessages(messages) {
 }
 
 // Display message pagination
-function displayMessagePagination(currentPage, totalPages) {
+function displayMessagePagination(currentPage, totalPages, isSearch) {
     const pagination = document.getElementById('messagePagination');
     
     if (totalPages <= 1) {
@@ -152,20 +210,32 @@ function displayMessagePagination(currentPage, totalPages) {
     let html = '';
     
     if (currentPage > 1) {
-        html += `<button class="btn" onclick="loadMessages(${currentPage - 1})">上一页</button>`;
+        if (isSearch && currentSearchKeyword) {
+            html += `<button class="btn" onclick="searchMessages('${currentSearchKeyword}', ${currentPage - 1})">上一页</button>`;
+        } else {
+            html += `<button class="btn" onclick="loadMessages(${currentPage - 1})">上一页</button>`;
+        }
     }
     
     for (let i = 1; i <= totalPages; i++) {
         if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
             const activeClass = i === currentPage ? 'active' : '';
-            html += `<button class="btn ${activeClass}" onclick="loadMessages(${i})">${i}</button>`;
+            if (isSearch && currentSearchKeyword) {
+                html += `<button class="btn ${activeClass}" onclick="searchMessages('${currentSearchKeyword}', ${i})">${i}</button>`;
+            } else {
+                html += `<button class="btn ${activeClass}" onclick="loadMessages(${i})">${i}</button>`;
+            }
         } else if (i === currentPage - 3 || i === currentPage + 3) {
             html += '<span>...</span>';
         }
     }
     
     if (currentPage < totalPages) {
-        html += `<button class="btn" onclick="loadMessages(${currentPage + 1})">下一页</button>`;
+        if (isSearch && currentSearchKeyword) {
+            html += `<button class="btn" onclick="searchMessages('${currentSearchKeyword}', ${currentPage + 1})">下一页</button>`;
+        } else {
+            html += `<button class="btn" onclick="loadMessages(${currentPage + 1})">下一页</button>`;
+        }
     }
     
     pagination.innerHTML = html;

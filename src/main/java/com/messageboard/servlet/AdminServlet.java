@@ -61,6 +61,36 @@ public class AdminServlet extends HttpServlet {
                 result.put("data", messages);
                 result.put("totalPages", totalPages);
             }
+        } else if ("search".equals(action)) {
+            if ("messages".equals(type)) {
+                String keyword = request.getParameter("keyword");
+                int page = 1;
+                int pageSize = 20;
+                try {
+                    page = Integer.parseInt(request.getParameter("page"));
+                } catch (NumberFormatException e) {
+                    page = 1;
+                }
+                
+                if (keyword != null && !keyword.trim().isEmpty()) {
+                    List<Message> messages = messageService.searchMessages(keyword, page, pageSize);
+                    int totalPages = messageService.getSearchTotalPages(keyword, pageSize);
+                    int totalCount = messageService.getSearchResultCount(keyword);
+                    result.put("success", true);
+                    result.put("data", messages);
+                    result.put("totalPages", totalPages);
+                    result.put("totalCount", totalCount);
+                } else {
+                    // Empty keyword, return all messages
+                    List<Message> messages = messageService.getMessages(page, pageSize);
+                    int totalPages = messageService.getTotalPages(pageSize);
+                    int totalCount = messageService.getTotalCount();
+                    result.put("success", true);
+                    result.put("data", messages);
+                    result.put("totalPages", totalPages);
+                    result.put("totalCount", totalCount);
+                }
+            }
         } else if ("get".equals(action)) {
             if ("user".equals(type)) {
                 int id = Integer.parseInt(request.getParameter("id"));

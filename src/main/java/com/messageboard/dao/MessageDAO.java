@@ -163,6 +163,68 @@ public class MessageDAO {
         return 0;
     }
 
+    public List<Message> searchMessages(String keyword, int page, int pageSize) {
+        List<Message> messages = new ArrayList<>();
+        String sql = "SELECT * FROM messages WHERE content LIKE ? OR nickname LIKE ? OR id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            
+            // Try to parse keyword as ID, if fails use 0
+            int searchId = 0;
+            try {
+                searchId = Integer.parseInt(keyword);
+            } catch (NumberFormatException e) {
+                // Not a number, use 0
+            }
+            stmt.setInt(3, searchId);
+            stmt.setInt(4, pageSize);
+            stmt.setInt(5, (page - 1) * pageSize);
+            
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                messages.add(extractMessageFromResultSet(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return messages;
+    }
+
+    public int getSearchResultCount(String keyword) {
+        String sql = "SELECT COUNT(*) FROM messages WHERE content LIKE ? OR nickname LIKE ? OR id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            
+            int searchId = 0;
+            try {
+                searchId = Integer.parseInt(keyword);
+            } catch (NumberFormatException e) {
+                // Not a number, use 0
+            }
+            stmt.setInt(3, searchId);
+            
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return 0;
+    }
+
     private Message extractMessageFromResultSet(ResultSet rs) throws SQLException {
         Message message = new Message();
         try {
