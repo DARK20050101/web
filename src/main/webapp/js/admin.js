@@ -4,18 +4,36 @@ let currentMessagePage = 1;
 let currentSearchKeyword = '';
 let searchTimeout = null;
 
+// Get context path for API calls
+const contextPath = window.location.pathname.substring(0, window.location.pathname.indexOf("/", 2)) || '';
+const apiUrl = contextPath + '/admin/api';
+
+console.log('Admin.js loaded - API URL:', apiUrl);
+
 // Load data on page load
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded - initializing admin dashboard');
+    
+    // Load initial data
     loadUsers();
     
     // Setup edit user form submission
-    document.getElementById('editUserForm').addEventListener('submit', handleEditUserSubmit);
+    const editUserForm = document.getElementById('editUserForm');
+    if (editUserForm) {
+        editUserForm.addEventListener('submit', handleEditUserSubmit);
+    }
     
     // Setup create user form submission
-    document.getElementById('createUserForm').addEventListener('submit', handleCreateUserSubmit);
+    const createUserForm = document.getElementById('createUserForm');
+    if (createUserForm) {
+        createUserForm.addEventListener('submit', handleCreateUserSubmit);
+    }
     
     // Setup edit message form submission
-    document.getElementById('editMessageForm').addEventListener('submit', handleEditMessageSubmit);
+    const editMessageForm = document.getElementById('editMessageForm');
+    if (editMessageForm) {
+        editMessageForm.addEventListener('submit', handleEditMessageSubmit);
+    }
 });
 
 // Debounce search function
@@ -41,10 +59,18 @@ function searchMessages(keyword, page) {
     }
     
     searchStatus.textContent = '搜索中...';
+    console.log('Searching messages:', keyword, 'page:', page);
     
-    fetch(`api?action=search&type=messages&keyword=${encodeURIComponent(keyword)}&page=${page}`)
-        .then(response => response.json())
+    fetch(apiUrl + `?action=search&type=messages&keyword=${encodeURIComponent(keyword)}&page=${page}`)
+        .then(response => {
+            console.log('Search response status:', response.status);
+            if (!response.ok) {
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Search data received:', data);
             if (data.success) {
                 displayMessages(data.data);
                 displayMessagePagination(page, data.totalPages, true);
@@ -54,13 +80,13 @@ function searchMessages(keyword, page) {
                         '<tr><td colspan="6">未找到匹配的留言</td></tr>';
                 }
             } else {
-                showError('搜索失败');
+                showError('搜索失败: ' + (data.message || '未知错误'));
                 searchStatus.textContent = '搜索失败';
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showError('搜索时发生错误');
+            console.error('Search error:', error);
+            showError('搜索时发生错误: ' + error.message);
             searchStatus.textContent = '搜索错误';
         });
 }
@@ -100,18 +126,41 @@ function showTab(tabName) {
 
 // Load users
 function loadUsers() {
-    fetch('api?action=list&type=users')
-        .then(response => response.json())
+    console.log('Loading users from:', apiUrl + '?action=list&type=users');
+    
+    const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '<tr><td colspan="6">加载中...</td></tr>';
+    
+    fetch(apiUrl + '?action=list&type=users')
+        .then(response => {
+            console.log('Users response status:', response.status);
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    showError('权限不足，请重新登录');
+                    setTimeout(() => {
+                        window.location.href = contextPath + '/login.jsp';
+                    }, 2000);
+                    throw new Error('Unauthorized');
+                }
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Users data received:', data);
             if (data.success) {
                 displayUsers(data.data);
             } else {
-                showError('加载用户列表失败');
+                showError('加载用户列表失败: ' + (data.message || '未知错误'));
+                tbody.innerHTML = '<tr><td colspan="6">加载失败</td></tr>';
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showError('加载用户时发生错误');
+            console.error('Load users error:', error);
+            if (error.message !== 'Unauthorized') {
+                showError('加载用户时发生错误: ' + error.message);
+                tbody.innerHTML = '<tr><td colspan="6">加载失败: ' + error.message + '</td></tr>';
+            }
         });
 }
 
@@ -149,19 +198,42 @@ function displayUsers(users) {
 // Load messages
 function loadMessages(page) {
     currentMessagePage = page;
-    fetch(`api?action=list&type=messages&page=${page}`)
-        .then(response => response.json())
+    console.log('Loading messages from:', apiUrl + `?action=list&type=messages&page=${page}`);
+    
+    const tbody = document.getElementById('messagesTableBody');
+    tbody.innerHTML = '<tr><td colspan="6">加载中...</td></tr>';
+    
+    fetch(apiUrl + `?action=list&type=messages&page=${page}`)
+        .then(response => {
+            console.log('Messages response status:', response.status);
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    showError('权限不足，请重新登录');
+                    setTimeout(() => {
+                        window.location.href = contextPath + '/login.jsp';
+                    }, 2000);
+                    throw new Error('Unauthorized');
+                }
+                throw new Error('HTTP error ' + response.status);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Messages data received:', data);
             if (data.success) {
                 displayMessages(data.data);
                 displayMessagePagination(page, data.totalPages);
             } else {
-                showError('加载留言列表失败');
+                showError('加载留言列表失败: ' + (data.message || '未知错误'));
+                tbody.innerHTML = '<tr><td colspan="6">加载失败</td></tr>';
             }
         })
         .catch(error => {
-            console.error('Error:', error);
-            showError('加载留言时发生错误');
+            console.error('Load messages error:', error);
+            if (error.message !== 'Unauthorized') {
+                showError('加载留言时发生错误: ' + error.message);
+                tbody.innerHTML = '<tr><td colspan="6">加载失败: ' + error.message + '</td></tr>';
+            }
         });
 }
 
@@ -243,7 +315,7 @@ function displayMessagePagination(currentPage, totalPages, isSearch) {
 
 // Edit user
 function editUser(userId) {
-    fetch(`api?action=get&type=user&id=${userId}`)
+    fetch(apiUrl + `?action=get&type=user&id=${userId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -254,12 +326,12 @@ function editUser(userId) {
                 document.getElementById('editIsAdmin').checked = user.admin;
                 document.getElementById('editUserModal').style.display = 'block';
             } else {
-                showError('加载用户信息失败');
+                showError('加载用户信息失败: ' + (data.message || ''));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showError('加载用户时发生错误');
+            showError('加载用户时发生错误: ' + error.message);
         });
 }
 
@@ -269,29 +341,29 @@ function handleEditUserSubmit(e) {
     
     const formData = new FormData(this);
     
-    fetch('api', {
+    fetch(apiUrl, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert(data.message || '更新成功');
             closeEditUserModal();
             loadUsers();
         } else {
-            showError(data.message);
+            showError(data.message || '更新失败');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError('更新用户时发生错误');
+        showError('更新用户时发生错误: ' + error.message);
     });
 }
 
 // Delete user
 function deleteUser(userId) {
-    if (!confirm('确定要删除该用户吗？这将删除该用户的所有相关数据。')) {
+    if (!confirm('确定要删除该用户吗？该用户的留言将变为匿名。')) {
         return;
     }
     
@@ -302,22 +374,22 @@ function deleteUser(userId) {
     formData.append('id', userId);
     formData.append('csrfToken', csrfToken);
     
-    fetch('api', {
+    fetch(apiUrl, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert(data.message || '删除成功');
             loadUsers();
         } else {
-            showError(data.message);
+            showError(data.message || '删除失败');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError('删除用户时发生错误');
+        showError('删除用户时发生错误: ' + error.message);
     });
 }
 
@@ -334,22 +406,22 @@ function deleteMessage(messageId) {
     formData.append('id', messageId);
     formData.append('csrfToken', csrfToken);
     
-    fetch('api', {
+    fetch(apiUrl, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert(data.message || '删除成功');
             loadMessages(currentMessagePage);
         } else {
-            showError(data.message);
+            showError(data.message || '删除失败');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError('删除留言时发生错误');
+        showError('删除留言时发生错误: ' + error.message);
     });
 }
 
@@ -375,29 +447,29 @@ function handleCreateUserSubmit(e) {
     
     const formData = new FormData(this);
     
-    fetch('api', {
+    fetch(apiUrl, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert(data.message || '创建成功');
             closeCreateUserModal();
             loadUsers();
         } else {
-            showError(data.message);
+            showError(data.message || '创建失败');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError('创建用户时发生错误');
+        showError('创建用户时发生错误: ' + error.message);
     });
 }
 
 // Edit message
 function editMessage(messageId) {
-    fetch(`api?action=get&type=message&id=${messageId}`)
+    fetch(apiUrl + `?action=get&type=message&id=${messageId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -406,12 +478,12 @@ function editMessage(messageId) {
                 document.getElementById('editMessageContent').value = message.content;
                 document.getElementById('editMessageModal').style.display = 'block';
             } else {
-                showError('加载留言信息失败');
+                showError('加载留言信息失败: ' + (data.message || ''));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            showError('加载留言时发生错误');
+            showError('加载留言时发生错误: ' + error.message);
         });
 }
 
@@ -426,23 +498,23 @@ function handleEditMessageSubmit(e) {
     
     const formData = new FormData(this);
     
-    fetch('api', {
+    fetch(apiUrl, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert(data.message);
+            alert(data.message || '更新成功');
             closeEditMessageModal();
             loadMessages(currentMessagePage);
         } else {
-            showError(data.message);
+            showError(data.message || '更新失败');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        showError('更新留言时发生错误');
+        showError('更新留言时发生错误: ' + error.message);
     });
 }
 
