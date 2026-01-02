@@ -173,11 +173,16 @@ public class MessageDao {
      * Search messages by keyword (searches in content and author fields)
      */
     public List<Message> searchMessages(String keyword) throws SQLException {
+        // Sanitize keyword to prevent SQL injection through LIKE pattern
+        String sanitizedKeyword = keyword.replace("\\", "\\\\")
+                                        .replace("%", "\\%")
+                                        .replace("_", "\\_");
+        
         String sql = "SELECT id, content, author, user_id, image_path, created_at, ip_address " +
                      "FROM messages WHERE content LIKE ? OR author LIKE ? ORDER BY created_at DESC";
         
         List<Message> messages = new ArrayList<>();
-        String searchPattern = "%" + keyword + "%";
+        String searchPattern = "%" + sanitizedKeyword + "%";
         
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

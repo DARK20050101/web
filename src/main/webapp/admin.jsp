@@ -226,7 +226,7 @@
                             '<button class="delete-btn" onclick="deleteMessage(' + message.id + ')" style="background: #f44336; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">删除</button>' +
                         '</div>' +
                     '</div>' +
-                    '<div class="message-content" style="margin-bottom: 10px;">' + message.content + '</div>' +
+                    '<div class="message-content" style="margin-bottom: 10px;">' + escapeHtml(message.content) + '</div>' +
                     imageHtml +
                 '</div>';
             }).join('');
@@ -303,7 +303,7 @@
                                             '<span style="font-weight: bold;">' + escapeHtml(message.author) + '</span>' +
                                             '<span style="color: #999;">' + formattedDate + '</span>' +
                                         '</div>' +
-                                        '<div>' + message.content + '</div>' +
+                                        '<div>' + escapeHtml(message.content) + '</div>' +
                                     '</div>';
                                 }).join('') + '</div>';
                         }

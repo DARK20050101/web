@@ -252,7 +252,23 @@ public class AdminServlet extends HttpServlet {
                 
                 // Prevent deleting own account
                 HttpSession session = request.getSession(false);
+                if (session == null) {
+                    result.put("success", false);
+                    result.put("error", "Session not found");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write(gson.toJson(result));
+                    return;
+                }
+                
                 User currentUser = (User) session.getAttribute("user");
+                if (currentUser == null) {
+                    result.put("success", false);
+                    result.put("error", "User not found in session");
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write(gson.toJson(result));
+                    return;
+                }
+                
                 if (currentUser.getId() == userId) {
                     result.put("success", false);
                     result.put("error", "Cannot delete your own account");
