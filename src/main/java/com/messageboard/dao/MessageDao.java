@@ -168,4 +168,43 @@ public class MessageDao {
         
         return messages;
     }
+
+    /**
+     * Search messages by keyword (searches in content and author fields)
+     */
+    public List<Message> searchMessages(String keyword) throws SQLException {
+        // Sanitize keyword to prevent SQL injection through LIKE pattern
+        String sanitizedKeyword = keyword.replace("\\", "\\\\")
+                                        .replace("%", "\\%")
+                                        .replace("_", "\\_");
+        
+        String sql = "SELECT id, content, author, user_id, image_path, created_at, ip_address " +
+                     "FROM messages WHERE content LIKE ? OR author LIKE ? ORDER BY created_at DESC";
+        
+        List<Message> messages = new ArrayList<>();
+        String searchPattern = "%" + sanitizedKeyword + "%";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, searchPattern);
+            stmt.setString(2, searchPattern);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Message message = new Message();
+                    message.setId(rs.getInt("id"));
+                    message.setContent(rs.getString("content"));
+                    message.setAuthor(rs.getString("author"));
+                    message.setUserId((Integer) rs.getObject("user_id"));
+                    message.setImagePath(rs.getString("image_path"));
+                    message.setCreatedAt(rs.getTimestamp("created_at"));
+                    message.setIpAddress(rs.getString("ip_address"));
+                    messages.add(message);
+                }
+            }
+        }
+        
+        return messages;
+    }
 }

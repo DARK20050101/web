@@ -179,4 +179,95 @@ public class UserDao {
             stmt.executeUpdate();
         }
     }
+
+    /**
+     * Get all users (admin only)
+     */
+    public java.util.List<User> getAllUsers() throws SQLException {
+        String sql = "SELECT id, username, email, is_admin, created_at FROM users ORDER BY created_at DESC";
+        
+        java.util.List<User> users = new java.util.ArrayList<>();
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getInt("id"));
+                user.setUsername(rs.getString("username"));
+                user.setEmail(rs.getString("email"));
+                user.setAdmin(rs.getBoolean("is_admin"));
+                user.setCreatedAt(rs.getTimestamp("created_at"));
+                users.add(user);
+            }
+        }
+        
+        return users;
+    }
+
+    /**
+     * Update user password (admin only)
+     */
+    public boolean updateUserPassword(int userId, String newPassword) throws SQLException {
+        String hashedPassword = SecurityUtil.hashPassword(newPassword);
+        String sql = "UPDATE users SET password = ? WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, hashedPassword);
+            stmt.setInt(2, userId);
+            
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Update user admin status
+     */
+    public boolean updateUserAdminStatus(int userId, boolean isAdmin) throws SQLException {
+        String sql = "UPDATE users SET is_admin = ? WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setBoolean(1, isAdmin);
+            stmt.setInt(2, userId);
+            
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Delete user by ID
+     */
+    public boolean deleteUser(int userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE id = ?";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, userId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    /**
+     * Get total user count
+     */
+    public int getUserCount() throws SQLException {
+        String sql = "SELECT COUNT(*) as count FROM users";
+        
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+            
+            if (rs.next()) {
+                return rs.getInt("count");
+            }
+        }
+        
+        return 0;
+    }
 }
