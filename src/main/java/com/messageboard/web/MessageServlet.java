@@ -76,6 +76,7 @@ public class MessageServlet extends HttpServlet {
         
         try {
             String idParam = request.getParameter("id");
+            String searchParam = request.getParameter("search");
             
             if (idParam != null) {
                 // Get single message
@@ -89,6 +90,18 @@ public class MessageServlet extends HttpServlet {
                     result.put("success", false);
                     result.put("error", "Message not found");
                 }
+            } else if (searchParam != null && !searchParam.trim().isEmpty()) {
+                // Search messages
+                List<Message> messages = messageDao.searchMessages(searchParam.trim());
+                List<Map<String, Object>> messageList = new ArrayList<>();
+                
+                for (Message message : messages) {
+                    messageList.add(convertMessageToMap(message));
+                }
+                
+                result.put("success", true);
+                result.put("messages", messageList);
+                result.put("searchKeyword", searchParam.trim());
             } else {
                 // Get all messages
                 List<Message> messages = messageDao.getAllMessages();
